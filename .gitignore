@@ -1,0 +1,16 @@
+/build*
+/source-*
+/.toolchains
+test/.spec-*
+test/*.log
+test/tailcall/*.S
+node_modules/
+__pycache__/
+.project
+.cproject
+.settings
+.vscode
+.DS_Store
+compile_commands.json
+*.o
+.cache/
