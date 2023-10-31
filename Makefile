@@ -4,6 +4,9 @@ SRCS+=minimal-main.c
 
 OBJS:=$(patsubst %.c,%.o,$(SRCS))
 
+CC:=clang
+CLANG_TARGET:=$(shell clang -print-target-triple)
+
 CFLAGS:=-I./wasm3/source/
 CFLAGS+=-I./local-api/
 CFLAGS+=--std=c11
@@ -18,14 +21,14 @@ CFLAGS+=-Dd_m3LogCodePages=0
 CFLAGS+=-Dd_m3LogRuntime=0
 CFLAGS+=-Dd_m3LogNativeStack=0
 
-LDFLAGS:=-lm
-LDFLAGS+=-fuse-ld=lld
+LDFLAGS:=-fuse-ld=lld
+
+ifneq ($(findstring msvc,$(CLANG_TARGET)),msvc)
+LDFLAGS+=-lm
+endif
 
 TARGET:=wasm3_with_kuso_code
 
-CC:=clang
-
-# TESTOPT:=--func test
 
 .PHONY: clean
 
@@ -40,13 +43,11 @@ testwasm-%:
 	$(MAKE) -C ./wasm-code/ $*
 
 test: $(TARGET) testwasm
-#	$(TARGET) $(TESTOPT) ./wasm-code/test_kuso_code.wasm
 	./$(TARGET) $(TESTOPT) ./wasm-code/test_kuso_code.wasm
 
 clean: testwasm-clean
 	rm -f $(OBJS)
 	rm -f $(TARGET)
-	rm -f $(TARGET).exe
 
 compiledb: clean
 	compiledb $(MAKE) $(TARGET) testwasm
