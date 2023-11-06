@@ -11,6 +11,8 @@ wasmランタイムを呼び出すだけ
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 #include "wasm3.h"
 
@@ -80,6 +82,7 @@ error_out:
 
 int run_wasm(struct wasm_binary *wasm) {
   int err = NO_ERROR;
+  bool module_loaded = false;
 
   printf("WASM3:START\n");
 
@@ -121,6 +124,8 @@ int run_wasm(struct wasm_binary *wasm) {
     printf("ERROR: m3_LoadModule: %s\n", result);
     err = ERR_WASM;
     goto out;
+  } else {
+    module_loaded = true;
   }
 
   m3_SetModuleName(module, "test");
@@ -147,9 +152,11 @@ out:
 
   /* https://github.com/wasm3/wasm3/blob/772f8f4648fcba75f77f894a6050db121e7651a2/source/wasm3.h#L240
   */
-  if (runtime) {
+  if (module_loaded) {
     printf("m3_FreeRuntime\n");
-    m3_FreeRuntime(runtime);
+    if (runtime) {
+      m3_FreeRuntime(runtime);
+    }
   } else if (module) {
     printf("m3_FreeModule\n");
     m3_FreeModule(module);
